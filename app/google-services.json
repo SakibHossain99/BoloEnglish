@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "297417098667",
+    "project_id": "boloenglish-67e9d",
+    "storage_bucket": "boloenglish-67e9d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:297417098667:android:1faf8f009835cd88eebeee",
+        "android_client_info": {
+          "package_name": "com.aistudio.boloenglish.qxmpza"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "297417098667-6rln828ftvo914k1peubof9jh89vgnh6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5KNzbwu8BlizjgZ4iHpvdCfaTPj86C8Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "297417098667-6rln828ftvo914k1peubof9jh89vgnh6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

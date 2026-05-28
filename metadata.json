@@ -1,0 +1,6 @@
+{
+  "name": "BoloEnglish",
+  "description": "A 90-day English learning app specifically designed for Bengali native speakers who are complete beginners.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
