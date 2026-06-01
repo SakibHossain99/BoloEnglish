@@ -34,13 +34,6 @@ android {
       buildConfigField("String", "FIREBASE_API_KEY", "\"$parsedApiKey\"")
       buildConfigField("String", "FIREBASE_APP_ID", "\"$parsedAppId\"")
       buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$parsedWebClientId\"")
-
-      resValue("string", "default_web_client_id", parsedWebClientId)
-      resValue("string", "firebase_database_url", "https://$parsedProjectId.firebaseio.com")
-      resValue("string", "google_api_key", parsedApiKey)
-      resValue("string", "google_app_id", parsedAppId)
-      resValue("string", "google_crash_reporting_api_key", parsedApiKey)
-      resValue("string", "project_id", parsedProjectId)
     } else {
       buildConfigField("String", "FIREBASE_PROJECT_ID", "\"\"")
       buildConfigField("String", "FIREBASE_API_KEY", "\"\"")
@@ -124,6 +117,9 @@ dependencies {
   implementation(libs.converter.moshi)
   // implementation(libs.firebase.ai)
   implementation(libs.firebase.auth)
+  implementation(libs.androidx.credentials)
+  implementation(libs.androidx.credentials.play.services.auth)
+  implementation(libs.googleid)
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.logging.interceptor)

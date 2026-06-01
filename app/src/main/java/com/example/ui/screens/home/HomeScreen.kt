@@ -77,7 +77,13 @@ fun HomeScreen(navController: NavController, repository: ProgressRepository) {
                             )
                         }
                         
-                        IconButton(onClick = { navController.navigate(Routes.SETTINGS) }) {
+                        IconButton(onClick = {
+                            try {
+                                navController.navigate(Routes.SETTINGS)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }) {
                             Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.outline)
                         }
                     }
@@ -157,7 +163,14 @@ fun HomeScreen(navController: NavController, repository: ProgressRepository) {
                     )
                     
                     Button(
-                        onClick = { navController.navigate(Routes.lessonRoute(progress.currentDay)) },
+                        onClick = {
+                            try {
+                                val targetDay = if (progress.currentDay <= 0) 1 else progress.currentDay
+                                navController.navigate(Routes.lessonRoute(targetDay))
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),

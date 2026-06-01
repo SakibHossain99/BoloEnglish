@@ -14,8 +14,9 @@ import com.example.ui.theme.SuccessGreen
 
 @Composable
 fun OnboardingScreen(navController: NavController, repository: ProgressRepository) {
-    var step by remember { mutableStateOf(1) }
-    var name by remember { mutableStateOf("") }
+    val progress by repository.progress.collectAsState()
+    var step by remember { mutableStateOf(if (progress.userName.isNotEmpty()) 2 else 1) }
+    var name by remember(progress.userName) { mutableStateOf(progress.userName) }
     var time by remember { mutableStateOf("30 min") }
 
     Surface(modifier = Modifier.fillMaxSize()) {

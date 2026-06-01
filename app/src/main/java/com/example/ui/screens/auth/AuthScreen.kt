@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -21,10 +22,24 @@ import androidx.navigation.NavController
 import com.example.data.ProgressRepository
 import com.example.ui.navigation.Routes
 import com.example.ui.theme.PrimaryBlue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.CustomCredential
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.launch
+import android.widget.Toast
+import com.example.BuildConfig
+import androidx.compose.runtime.remember
 
 @Composable
 fun AuthScreen(navController: NavController, repository: ProgressRepository) {
     val progress by repository.progress.collectAsState()
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val credentialManager = remember { CredentialManager.create(context) }
     
     // Auto-redirect if already logged in and onboarding complete
     if (progress.userName.isNotEmpty() && progress.currentDay > 0) {
@@ -90,15 +105,33 @@ fun AuthScreen(navController: NavController, repository: ProgressRepository) {
                         // Google Auth Button
                         OutlinedButton(
                             onClick = {
-                                // Mapped Firebase Google Sign-In hook
-                                val dummyGoogleToken = "google_token_abc123"
-                                val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(dummyGoogleToken, null)
-                                com.google.firebase.auth.FirebaseAuth.getInstance().signInWithCredential(credential)
-                                    .addOnCompleteListener { task ->
-                                        // For demo/simulated run, update progress and navigate
-                                        repository.updateProgress { it.copy(authMethod = "Google") }
-                                        navController.navigate(Routes.ONBOARDING)
+                                coroutineScope.launch {
+                                    try {
+                                        val googleIdOption = GetGoogleIdOption.Builder()
+                                            .setFilterByAuthorizedAccounts(false)
+                                            .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                                            .setAutoSelectEnabled(true)
+                                            .build()
+
+                                        val request = GetCredentialRequest.Builder()
+                                            .addCredentialOption(googleIdOption)
+                                            .build()
+
+                                        val result = credentialManager.getCredential(context = context, request = request)
+                                        val credential = result.credential
+
+                                        if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                                            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                                            val idToken = googleIdTokenCredential.idToken
+                                            firebaseAuthWithGoogle(idToken, repository, navController, context)
+                                        } else {
+                                            Toast.makeText(context, "Unexpected credential type", Toast.LENGTH_SHORT).show()
+                                        }
+                                    } catch (e: Exception) {
+                                        Toast.makeText(context, "Google Sign-In failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                                        e.printStackTrace()
                                     }
+                                }
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -181,4 +214,25 @@ fun AuthScreen(navController: NavController, repository: ProgressRepository) {
             }
         }
     }
+}
+
+private fun firebaseAuthWithGoogle(
+    idToken: String,
+    repository: ProgressRepository,
+    navController: NavController,
+    context: android.content.Context
+) {
+    val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+    com.google.firebase.auth.FirebaseAuth.getInstance().signInWithCredential(credential)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val firebaseUser = task.result?.user
+                val displayName = firebaseUser?.displayName ?: "Google User"
+                repository.updateProgress { it.copy(authMethod = "Google", userName = displayName) }
+                Toast.makeText(context, "Welcome $displayName!", Toast.LENGTH_SHORT).show()
+                navController.navigate(Routes.ONBOARDING)
+            } else {
+                Toast.makeText(context, "Firebase authentication failed: ${task.exception?.localizedMessage}", Toast.LENGTH_LONG).show()
+            }
+        }
 }

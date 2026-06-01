@@ -54,11 +54,15 @@ fun SettingsScreen(navController: NavController, repository: ProgressRepository)
             text = { Text("আপনার সমস্ত progress মুছে যাবে। এই কাজ আর undo করা যাবে না।") },
             confirmButton = {
                 TextButton(onClick = {
-                    repository.resetProgress()
-                    com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
-                    showResetDialog = false
-                    navController.navigate(Routes.AUTH) {
-                        popUpTo(0) { inclusive = true }
+                    try {
+                        repository.resetProgress()
+                        com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+                        showResetDialog = false
+                        navController.navigate(Routes.AUTH) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
                 }) { Text("হ্যাঁ, সব মুছে দাও", color = MaterialTheme.colorScheme.error) }
             },
@@ -318,8 +322,8 @@ fun SettingsScreen(navController: NavController, repository: ProgressRepository)
                                 )
                             }
                             Text(
-                                text = "অডিও এফেক্টস",
-                                style = Modifier.fillMaxWidth(0.6f).let { Modifier },
+                                text = "Hello",
+                                modifier = Modifier.fillMaxWidth(0.6f),
                                 maxLines = 1,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -430,10 +434,14 @@ fun SettingsScreen(navController: NavController, repository: ProgressRepository)
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
-                                repository.updateProgress { it.copy(authMethod = "guest", userName = "", currentDay = 0) }
-                                navController.navigate(Routes.AUTH) {
-                                    popUpTo(0) { inclusive = true }
+                                try {
+                                    com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+                                    repository.updateProgress { it.copy(authMethod = "guest", userName = "", currentDay = 0) }
+                                    navController.navigate(Routes.AUTH) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
                                 }
                             }
                             .padding(20.dp),
